@@ -37,7 +37,7 @@ provider "azurerm" {
       roll_instances_when_required = true
     }
   }
-  use_msi = true
+  #use_msi = true
 }
 
 # Dynamic Kubernetes provider configuration using admin credentials
@@ -51,7 +51,7 @@ provider "kubernetes" {
 
 # Dynamic Helm provider configuration using admin credentials  
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = try(azurerm_kubernetes_cluster.main.kube_admin_config.0.host, "")
     client_certificate     = try(base64decode(azurerm_kubernetes_cluster.main.kube_admin_config.0.client_certificate), "")
     client_key             = try(base64decode(azurerm_kubernetes_cluster.main.kube_admin_config.0.client_key), "")
