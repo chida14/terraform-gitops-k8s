@@ -6,7 +6,7 @@ variable "environment" {
 variable "location" {
   description = "Azure region for resources"
   type        = string
-  default     = "eastus"
+  default     = "australiaeast"
 }
 
 variable "resource_group_name" {
@@ -42,7 +42,7 @@ variable "kubernetes_version" {
 variable "gitops_repo_url" {
   description = "GitOps repository URL for ArgoCD"
   type        = string
-  default     = "https://github.com/itsbaivab/gitops-configs.git"
+  default     = "https://github.com/chida14/terraform-gitops-k8s.git"
 }
 
 variable "argocd_namespace" {
@@ -54,13 +54,13 @@ variable "argocd_namespace" {
 variable "app_repo_url" {
   description = "Repository URL for the application to be deployed via ArgoCD"
   type        = string
-  default     = "https://github.com/itsBaivab/gitops-configs.git"
+  default     = "https://github.com/chida14/terraform-gitops-k8s.git"
 }
 
 variable "app_repo_path" {
   description = "Path within the repository for the application manifests"
   type        = string
-  default     = "3tire-configs"
+  default     = "manifest-files/3tire-configs"
 }
 
 # Tags
@@ -107,7 +107,7 @@ variable "postgres_password" {
   description = "PostgreSQL admin password"
   type        = string
   sensitive   = true
-  default     = "SecurePassword123!"
+  default     = ""
 }
 
 variable "postgres_database" {
