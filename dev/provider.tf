@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/time"
       version = "~> 0.9" # For wait resources
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+  }
   }
   required_version = ">= 1.5.0"
 }
@@ -51,10 +55,13 @@ provider "kubernetes" {
 
 # Dynamic Helm provider configuration using admin credentials  
 provider "helm" {
-  kubernetes = {
+  kubernetes {
     host                   = try(azurerm_kubernetes_cluster.main.kube_admin_config.0.host, "")
     client_certificate     = try(base64decode(azurerm_kubernetes_cluster.main.kube_admin_config.0.client_certificate), "")
     client_key             = try(base64decode(azurerm_kubernetes_cluster.main.kube_admin_config.0.client_key), "")
     cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.main.kube_admin_config.0.cluster_ca_certificate), "")
   }
+
 }
+
+provider "tls" {}

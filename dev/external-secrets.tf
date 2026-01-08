@@ -21,6 +21,7 @@ resource "null_resource" "external_secrets_operator" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]  #This forces Terraform to run the command via bash, even on Windows.
     command = <<-EOT
       ${path.module}/scripts/install-external-secrets.sh \
         "${azurerm_resource_group.main.name}" \

@@ -1,6 +1,6 @@
 # Environment Configuration
 environment             = "dev"                # Environment name (dev/test/prod)
-location                = "australiaeast"             # Azure region for resource deployment
+location                = "australiaeast"      # Azure region for resource deployment
 resource_group_name     = "aks-gitops-rg"      # Azure resource group name
 kubernetes_cluster_name = "aks-gitops-cluster" # AKS cluster name
 node_count              = 2                    # Number of worker nodes in AKS cluster
@@ -9,11 +9,11 @@ kubernetes_version      = "1.32.5"             # Kubernetes version for AKS clus
 
 # GitOps Configuration
 gitops_repo_url  = "https://github.com/chida14/terraform-gitops-k8s.git" # GitOps repository for infrastructure configs (reference only)
-argocd_namespace = "argocd"                                          # Namespace where ArgoCD will be deployed
+argocd_namespace = "argocd"                                              # Namespace where ArgoCD will be deployed
 
 # Application Deployment Configuration 
 app_repo_url  = "https://github.com/chida14/terraform-gitops-k8s.git" # Repository containing your application manifests
-app_repo_path = "manifest-files/3tire-configs"                                   # Path within app repository containing Kubernetes manifests
+app_repo_path = "manifest-files/3tire-configs"                        # Path within app repository containing Kubernetes manifests
 
 tags = {
   Environment = "development"

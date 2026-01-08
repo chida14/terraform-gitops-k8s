@@ -37,6 +37,12 @@ resource "azurerm_resource_group" "main" {
 
 }
 
+# Generate the ssh keys using tls_private_key
+resource "tls_private_key" "aks_ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 # AKS cluster with improved configuration
 resource "azurerm_kubernetes_cluster" "main" {
   name                = "${var.kubernetes_cluster_name}-${var.environment}"
@@ -68,13 +74,21 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   # Conditional SSH key configuration
-  dynamic "linux_profile" {
-    for_each = fileexists("~/.ssh/id_rsa_azure.pub") ? [1] : []
-    content {
-      admin_username = "azureuser"
-      ssh_key {
-        key_data = file("~/.ssh/id_rsa_azure.pub")
-      }
+  
+  # dynamic "linux_profile" {
+  #   for_each = fileexists("~/.ssh/id_rsa_azure.pub") ? [1] : []
+  #   content {
+  #     admin_username = "azureuser"
+  #     ssh_key {
+  #       key_data = file("~/.ssh/id_rsa_azure.pub")
+  #     }
+  #   }
+  # }
+
+  linux_profile {
+    admin_username = "azureuser"
+    ssh_key {
+      key_data = tls_private_key.aks_ssh.public_key_openssh
     }
   }
 
@@ -109,6 +123,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   tags = local.common_tags
+}
+
+# Save the private key to a local file for SSH access
+resource "local_file" "aks_private_key" {
+  content         = tls_private_key.aks_ssh.private_key_pem
+  filename        = "${path.module}/aks_ssh_key.pem"
+  file_permission = "0600"
 }
 
 # Role assignment for the current user to have admin access to the cluster
@@ -164,6 +185,7 @@ resource "random_password" "postgres_password" {
   lower   = true
   numeric = true
 }
+
 
 # Create Key Vault for storing sensitive cluster and application secrets
 resource "azurerm_key_vault" "main" {
@@ -240,6 +262,43 @@ resource "azurerm_key_vault" "main" {
   }
 
   tags = local.common_tags
+}
+
+# ===============================
+# AKS SSH Keys
+# ===============================
+
+# Store AKS SSH keys in Key Vault
+resource "azurerm_key_vault_secret" "aks_ssh_public_key" {
+  count        = var.enable_key_vault ? 1 : 0
+  name         = "aks-ssh-public-key"
+  value        = tls_private_key.aks_ssh.public_key_openssh
+  key_vault_id = azurerm_key_vault.main[0].id
+
+  content_type = "text/plain"
+
+  lifecycle {
+    prevent_destroy = false
+    replace_triggered_by = [azurerm_key_vault.main[0].id]
+  }
+
+  depends_on = [azurerm_key_vault.main]
+}
+
+resource "azurerm_key_vault_secret" "aks_ssh_private_key" {
+  count        = var.enable_key_vault ? 1 : 0
+  name         = "aks-ssh-private-key"
+  value        = tls_private_key.aks_ssh.private_key_pem
+  key_vault_id = azurerm_key_vault.main[0].id
+
+  content_type = "text/plain"
+
+  lifecycle {
+    prevent_destroy = false
+    replace_triggered_by = [azurerm_key_vault.main[0].id]
+  }
+
+  depends_on = [azurerm_key_vault.main]
 }
 
 # ===============================
